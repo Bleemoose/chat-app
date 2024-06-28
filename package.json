@@ -4,13 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm install",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "start": "node index.js"
   },
   "keywords": [],
+  "homepage": "https://bleemoose.github.io/chat-app",
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
     "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
   }
 }
