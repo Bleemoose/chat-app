@@ -4,8 +4,41 @@ body {
     padding: 20px;
 }
 
-h1 {
-    text-align: center;
+#username-container,
+#chat-container,
+#chat-input-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#username-input,
+#chat-input {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+#username-button,
+#send-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#chat-container {
+    height: 400px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 10px;
 }
 
 #messages {
@@ -14,21 +47,5 @@ h1 {
 }
 
 #messages li {
-    padding: 5px 10px;
-}
-
-#chat-form {
-    display: flex;
-    margin-top: 20px;
-}
-
-#chat-input {
-    flex-grow: 1;
-    padding: 5px 10px;
-    font-size: 16px;
-}
-
-button {
-    padding: 5px 10px;
-    font-size: 16px;
+    margin-bottom: 10px;
 }

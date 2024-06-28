@@ -7,7 +7,7 @@ const io = require('socket.io')(http);
 let chatHistory = [];
 
 // Serve static files from the "public" directory
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
@@ -16,14 +16,19 @@ app.get('/', (req, res) => {
 
 // Handle incoming socket.io connections
 io.on('connection', (socket) => {
-    // Send the chat history to the new client
-    socket.emit('chat history', chatHistory);
+
+    // Handle username setting
+    socket.on('set username', (username) => {
+        socket.username = username;
+        console.log(`User ${username} connected`);
+        socket.emit('chat history', chatHistory);
+    });
 
     // Handle chat messages
     socket.on('chat message', (msg) => {
         console.log('message: ' + msg);
-        chatHistory.push({ message: msg, sender: socket.id });
-        io.emit('chat message', msg , socket.id);
+        chatHistory.push({ message: msg, sender: socket.username });
+        io.emit('chat message', { message: msg, sender: socket.username });
     });
 
 
