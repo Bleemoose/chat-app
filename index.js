@@ -3,6 +3,11 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
+function getRandomColor() {
+    const colorList = ['Aqua','Aquamarine','Black','BlueViolet','Chocolate','Crimson','Orange'];
+    return colorList[Math.floor(Math.random() * colorList.length)];
+}
+
 // Variable to store chat messages
 let chatHistory = [];
 
@@ -19,25 +24,24 @@ io.on('connection', (socket) => {
 
     // Handle username setting
     socket.on('set username', (username) => {
+        if (username !== socket.username){
+            //get random colour
+            socket.color = getRandomColor();
+        }
         socket.username = username;
         console.log(`User ${username} connected`);
         socket.emit('chat history', chatHistory);
+
     });
 
     // Handle chat messages
     socket.on('chat message', (msg) => {
         console.log('message: ' + msg);
-        chatHistory.push({ message: msg, sender: socket.username });
-        io.emit('chat message', { message: msg, sender: socket.username });
+        chatHistory.push({ message: msg, sender: socket.username, color: socket.color });
+        io.emit('chat message', { message: msg, sender: socket.username, color: socket.color });
     });
 
 
-    // Handle username setting
-    socket.on('set username', (username) => {
-        socket.username = username;
-        console.log(`User ${username} connected`);
-        socket.emit('chat history', chatHistory);
-    });
 
     // Handle user disconnection
     socket.on('disconnect', () => {

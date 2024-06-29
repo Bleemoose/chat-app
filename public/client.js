@@ -38,14 +38,15 @@ usernameButton.addEventListener('click', () => {
 // Receive the chat history from the server
 socket.on('chat history', (history) => {
     history.forEach((message) => {
+        console.log(message);
 
-        displayMessage(message.message, message.sender);
+        displayMessage(message.message, message.sender, message.color);
     });
 });
 
 // Handle new chat messages
 socket.on('chat message', (msg) => {
-    displayMessage(msg.message, msg.sender);
+    displayMessage(msg.message, msg.sender, msg.color);
 });
 
 chatInput.addEventListener('keyup', (e) => {
@@ -68,8 +69,10 @@ function sendMessage() {
     }
 }
 
-function displayMessage(message, sender) {
-    const li = document.createElement('li');
+function displayMessage(message, sender, color) {
+    let li = document.createElement('li');
+    console.log(color)
+    li.style.color = `${color}`
     li.textContent = `${sender}: ${message}`;
     messagesList.appendChild(li);
     messagesList.scrollTop = messagesList.scrollHeight;
