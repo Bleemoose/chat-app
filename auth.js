@@ -34,7 +34,7 @@ function loadUsers() {
         if (err.code === 'ENOENT') {
             // File doesn't exist, create a new one
             saveUsers([]);
-            return {};
+            return [];
         } else {
             console.error('Error loading users:', err);
             return [];
