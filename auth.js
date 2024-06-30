@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require("bcryptjs")
+const jwt = require('jsonwebtoken');
 
 const usersFilePath = path.join(__dirname, 'users.json');
 
@@ -56,7 +57,7 @@ async function registerUser(username, password) {
         return false; // Username already exists
     }
     let hashedPassword = await bcrypt.hash(password, 8)
-    let newUser = new User(username, password, 'black');
+    let newUser = new User(username, hashedPassword, 'black');
     console.log(typeof users);
     users.push(newUser)
     saveUsers(users);
@@ -72,7 +73,27 @@ function authenticateUser(username, password) {
     }
 }
 
+
+function verifyToken(req, res, next) {
+    let token;
+    for (let i = 0 ; i < req.rawHeaders.length ; i++){
+        if (req.rawHeaders[i].includes('token=')){
+            console.log(req.rawHeaders[i]);
+            token = req.rawHeaders[i].slice(6)
+        }
+    }
+    if (!token) return res.status(401).json({ error: 'Access denied' });
+    try {
+        const decoded = jwt.verify(token, 'your-secret-key');
+        req.username = decoded.username;
+        next();
+    } catch (error) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
 module.exports = {
     registerUser,
-    authenticateUser
+    authenticateUser,
+    verifyToken
 };

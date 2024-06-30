@@ -3,7 +3,8 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
-const { registerUser, authenticateUser } = require('./auth');
+const { registerUser, authenticateUser, verifyToken} = require('./auth');
+const jwt = require("jsonwebtoken");
 
 function getRandomColor() {
     const colorList = ['Aqua','Aquamarine','Black','BlueViolet','Chocolate','Crimson','Orange'];
@@ -19,8 +20,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 //Main page
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+app.get('/', verifyToken ,(req, res) => {
+    res.sendFile(__dirname + '/public/chat.html');
 });
 //Login page
 app.get('/login', (req, res) => {
@@ -43,7 +44,11 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (authenticateUser(username, password)) {
-        res.status(200).redirect('/')
+        const token = jwt.sign({ userId: username }, 'your-secret-key', {
+            expiresIn: '1h',
+        });
+        res.cookie('token' , token);
+        res.status(200).redirect('/');
     } else {
         res.status(401).send('Invalid username or password');
     }
