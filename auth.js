@@ -78,15 +78,24 @@ function verifyToken(req, res, next) {
     let token;
     for (let i = 0 ; i < req.rawHeaders.length ; i++){
         if (req.rawHeaders[i].includes('token=')){
-            console.log(req.rawHeaders[i]);
+            //console.log(req.rawHeaders[i]);
             token = req.rawHeaders[i].slice(6)
         }
     }
     if (!token) return res.status(401).json({ error: 'Access denied' });
     try {
+        let users = loadUsers()
         const decoded = jwt.verify(token, 'your-secret-key');
-        req.username = decoded.username;
-        next();
+
+        userIndex = findUser(decoded.username, users)
+        if ( userIndex != null){
+            req.user = users[userIndex];
+
+            next();
+        }else{
+            throw 'Unauthorized';
+        }
+
     } catch (error) {
         res.status(401).json({ error: 'Invalid token' });
     }

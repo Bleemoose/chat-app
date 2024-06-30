@@ -7,7 +7,7 @@ const chatSendButton = document.getElementById('send-button');
 const chatInput = document.getElementById('chat-input');
 const messagesList = document.getElementById('messages');
 
-let username = localStorage.getItem('username') || '';
+let username = '';
 
 if (username) {
     usernameInput.value = username;
@@ -24,7 +24,6 @@ usernameButton.addEventListener('click', () => {
     if (newUsername) {
         username = newUsername;
         socket.emit('set username', username);
-        localStorage.setItem('username', username);
         usernameInput.value = '';
         usernameInput.disabled = true;
         usernameButton.disabled = true;
@@ -34,6 +33,10 @@ usernameButton.addEventListener('click', () => {
         usernameInput.style.display = 'none'
     }
 });
+
+socket.on('user set', (user) => {
+    //TODO: Now that we have the user object from backend we need to just make the client use it so jsut redo client :D
+})
 
 // Receive the chat history from the server
 socket.on('chat history', (history) => {

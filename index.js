@@ -18,9 +18,11 @@ let chatHistory = [];
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+let user;
 
 //Main page
 app.get('/', verifyToken ,(req, res) => {
+    user = req.user;
     res.sendFile(__dirname + '/public/chat.html');
 });
 //Login page
@@ -44,7 +46,7 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (authenticateUser(username, password)) {
-        const token = jwt.sign({ userId: username }, 'your-secret-key', {
+        const token = jwt.sign({ username: username }, 'your-secret-key', {
             expiresIn: '1h',
         });
         res.cookie('token' , token);
@@ -55,8 +57,10 @@ app.post('/login', (req, res) => {
 });
 
 
-// Handle incoming socket.io connections
+
+
 io.on('connection', (socket) => {
+    socket.emit('user set', user)
 
     // Handle username setting
     socket.on('set username', (username) => {
