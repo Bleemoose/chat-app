@@ -6,17 +6,27 @@ const chatInputContainer = document.getElementById('chat-input-container');
 const chatSendButton = document.getElementById('send-button');
 const chatInput = document.getElementById('chat-input');
 const messagesList = document.getElementById('messages');
+const setColorButton  = document.getElementById('set-color-button');
+const colorPicker = document.getElementById('color-picker');
 
+//TODO: Clean up :')
 let username = '';
+let user;
+
+socket.on('no user' , (ye => {
+    console.log('no user');
+    window.location.reload()
+}))
+
+usernameInput.disabled = true;
+usernameButton.disabled = true;
+usernameButton.style.display = 'none'
+usernameInput.style.display = 'none'
+chatContainer.style.display = 'block';
+chatInputContainer.style.display = 'flex';
 
 if (username) {
     usernameInput.value = username;
-    usernameInput.disabled = true;
-    usernameButton.disabled = true;
-    usernameButton.style.display = 'none'
-    usernameInput.style.display = 'none'
-    chatContainer.style.display = 'block';
-    chatInputContainer.style.display = 'flex';
     socket.emit('set username', username);
 }
 usernameButton.addEventListener('click', () => {
@@ -34,8 +44,18 @@ usernameButton.addEventListener('click', () => {
     }
 });
 
+
+
+setColorButton.addEventListener('click', () =>{
+    console.log(colorPicker.value);
+    socket.emit('change color' , colorPicker.value);
+})
+
+
 socket.on('user set', (user) => {
     //TODO: Now that we have the user object from backend we need to just make the client use it so jsut redo client :D
+    user = user;
+    colorPicker.value = user.color;
 })
 
 // Receive the chat history from the server
@@ -51,6 +71,8 @@ socket.on('chat history', (history) => {
 socket.on('chat message', (msg) => {
     displayMessage(msg.message, msg.sender, msg.color);
 });
+
+
 
 chatInput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {

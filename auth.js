@@ -53,24 +53,38 @@ function saveUsers(users) {
 
 async function registerUser(username, password) {
     const users = loadUsers();
-    if (users[username]) {
+    if (findUser(username,users) !=null) {
         return false; // Username already exists
     }
     let hashedPassword = await bcrypt.hash(password, 8)
     let newUser = new User(username, hashedPassword, 'black');
-    console.log(typeof users);
     users.push(newUser)
     saveUsers(users);
     return true;
 }
 
+function updateColor(user,color){
+    let users = loadUsers()
+    let userIndex = findUser(user.username , users)
+    if (userIndex != null){
+        users[userIndex].color = color;
+        saveUsers(users);
+        return true;
+    }
+    return false;
+}
+
 function authenticateUser(username, password) {
     const users = loadUsers();
-    if (bcrypt.compare(password, users[findUser(username,users)].password)){
-        return users[findUser(username,users)];
-    }else{
-        return false;
+    if (findUser(username, users)  != null) {
+        if (bcrypt.compare(password, users[findUser(username,users)].password)){
+            return users[findUser(username,users)];
+        }else{
+            return false;
+        }
     }
+    return false;
+
 }
 
 
@@ -82,7 +96,9 @@ function verifyToken(req, res, next) {
             token = req.rawHeaders[i].slice(6)
         }
     }
-    if (!token) return res.status(401).json({ error: 'Access denied' });
+    if (!token){
+        return res.redirect('/login');
+    }
     try {
         let users = loadUsers()
         const decoded = jwt.verify(token, 'your-secret-key');
@@ -104,5 +120,6 @@ function verifyToken(req, res, next) {
 module.exports = {
     registerUser,
     authenticateUser,
-    verifyToken
+    verifyToken,
+    updateColor
 };
