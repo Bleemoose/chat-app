@@ -5,7 +5,9 @@ const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
 const { registerUser, authenticateUser, verifyToken, updateColor} = require('./auth');
 const jwt = require("jsonwebtoken");
+const {openDatabase,closeDatabase} = require('./database');
 
+//TODO: Clean up old functions
 function getRandomColor() {
     const colorList = ['Aqua','Aquamarine','Black','BlueViolet','Chocolate','Crimson','Orange'];
     return colorList[Math.floor(Math.random() * colorList.length)];
@@ -17,7 +19,8 @@ let chatHistory = [];
 // Serve static files from the "public" directory
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
-
+let db = openDatabase();
+closeDatabase(db)
 let user;
 
 //Main page
