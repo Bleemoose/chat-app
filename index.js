@@ -19,8 +19,11 @@ let chatHistory = [];
 // Serve static files from the "public" directory
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
-let db = openDatabase();
-closeDatabase(db)
+if (openDatabase()){
+    console.log("yupieeeeeeeeeeee")
+}else{
+    console.log(":(")
+}
 let user;
 
 //Main page

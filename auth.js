@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
+const {openDatabase,closeDatabase,writeUsers, readUsers} = require('./database');
 
 const usersFilePath = path.join(__dirname, 'users.json');
 
@@ -27,10 +28,13 @@ function findUser(username, users){
     return null;
 }
 
-function loadUsers() {
+async function loadUsers() {
     try {
-        const usersData = fs.readFileSync(usersFilePath, 'utf8');
-        return JSON.parse(usersData);
+        //const usersData = fs.readFileSync(usersFilePath, 'utf8');
+        //return JSON.parse(usersData);
+        let loadedUsersFromDB = await readUsers();
+        console.log(loadedUsersFromDB);
+        return loadedUsersFromDB;
     } catch (err) {
         if (err.code === 'ENOENT') {
             // File doesn't exist, create a new one
@@ -46,6 +50,7 @@ function loadUsers() {
 function saveUsers(users) {
     try {
         fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
+        writeUsers(users)
     } catch (err) {
         console.error('Error saving users:', err);
     }
@@ -121,5 +126,6 @@ module.exports = {
     registerUser,
     authenticateUser,
     verifyToken,
-    updateColor
+    updateColor,
+    User
 };
