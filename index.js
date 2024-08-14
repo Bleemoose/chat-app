@@ -3,15 +3,18 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
-const { registerUser, authenticateUser, verifyToken, updateColor} = require('./auth');
+const { registerUser, authenticateUser, verifyToken, updateColor, loadUsers} = require('./auth');
 const jwt = require("jsonwebtoken");
 const {openDatabase,closeDatabase} = require('./database');
+
 
 //TODO: Clean up old functions
 function getRandomColor() {
     const colorList = ['Aqua','Aquamarine','Black','BlueViolet','Chocolate','Crimson','Orange'];
     return colorList[Math.floor(Math.random() * colorList.length)];
 }
+
+
 
 // Variable to store chat messages
 let chatHistory = [];
@@ -21,6 +24,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 if (openDatabase()){
     console.log("yupieeeeeeeeeeee")
+    loadUsers()
 }else{
     console.log(":(")
 }

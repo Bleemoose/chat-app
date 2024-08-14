@@ -6,6 +6,9 @@ const {openDatabase,closeDatabase,writeUsers, readUsers} = require('./database')
 
 const usersFilePath = path.join(__dirname, 'users.json');
 
+/*TODO: make sure this doesnt cause any problems down the line cause i used to read
+in every function before implementing the database*/
+let users = []
 
 //Constructor for user
 function User(username, password, color) {
@@ -34,6 +37,7 @@ async function loadUsers() {
         //return JSON.parse(usersData);
         let loadedUsersFromDB = await readUsers();
         console.log(loadedUsersFromDB);
+        users = loadedUsersFromDB
         return loadedUsersFromDB;
     } catch (err) {
         if (err.code === 'ENOENT') {
@@ -57,7 +61,7 @@ function saveUsers(users) {
 }
 
 async function registerUser(username, password) {
-    const users = loadUsers();
+    //const users = await loadUsers();
     if (findUser(username,users) !=null) {
         return false; // Username already exists
     }
@@ -69,7 +73,7 @@ async function registerUser(username, password) {
 }
 
 function updateColor(user,color){
-    let users = loadUsers()
+   //let users =  loadUsers()
     let userIndex = findUser(user.username , users)
     if (userIndex != null){
         users[userIndex].color = color;
@@ -80,7 +84,7 @@ function updateColor(user,color){
 }
 
 function authenticateUser(username, password) {
-    const users = loadUsers();
+    //const users = loadUsers();
     if (findUser(username, users)  != null) {
         if (bcrypt.compare(password, users[findUser(username,users)].password)){
             return users[findUser(username,users)];
@@ -105,7 +109,7 @@ function verifyToken(req, res, next) {
         return res.redirect('/login');
     }
     try {
-        let users = loadUsers()
+        //let users = loadUsers()
         const decoded = jwt.verify(token, 'your-secret-key');
 
         userIndex = findUser(decoded.username, users)
@@ -127,5 +131,6 @@ module.exports = {
     authenticateUser,
     verifyToken,
     updateColor,
-    User
+    users,
+    loadUsers
 };

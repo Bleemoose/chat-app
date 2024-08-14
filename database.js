@@ -73,20 +73,25 @@ function writeUsers(users){
 
 }
 //TODO fix problem with async calls all over the auth
-async function readUsers() {
-    let users = []
-    await db.all(`SELECT user_id, username, password, color FROM users`, [], (err, rows) => {
-        if (err) {
-            throw err;
-        }
+function readUsers() {
 
-        rows.forEach((row) => {
-            console.log(`ID: ${row.user_id}, Username: ${row.username},Color: ${row.color} ,Password: ${row.password}`);
-            users.push(new User(row.username, row.password, row.color))
+
+    return new Promise((resolve, reject) => {
+        let users = []
+        db.all(`SELECT user_id, username, password, color FROM users`, [], (err, rows) => {
+            if (err) {
+                return reject(err);
+            }
+
+            rows.forEach((row) => {
+                console.log(`ID: ${row.user_id}, Username: ${row.username},Color: ${row.color} ,Password: ${row.password}`);
+                users.push(new User(row.username, row.password, row.color))
+            });
+            resolve(users)
         });
 
+
     });
-    return users;
 
 }
 
