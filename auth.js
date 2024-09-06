@@ -36,7 +36,7 @@ async function loadUsers() {
         //const usersData = fs.readFileSync(usersFilePath, 'utf8');
         //return JSON.parse(usersData);
         let loadedUsersFromDB = await readUsers();
-        console.log(loadedUsersFromDB);
+        //console.log(loadedUsersFromDB);
         users = loadedUsersFromDB
         return loadedUsersFromDB;
     } catch (err) {
@@ -53,7 +53,7 @@ async function loadUsers() {
 
 function saveUsers(users) {
     try {
-        fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
+        //fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
         writeUsers(users)
     } catch (err) {
         console.error('Error saving users:', err);
@@ -103,8 +103,14 @@ function verifyToken(req, res, next) {
     let token;
     for (let i = 0 ; i < req.rawHeaders.length ; i++){
         if (req.rawHeaders[i].includes('token=')){
+            //possible bug with mozilla because it sends header tokens differently than chrome
             //console.log(req.rawHeaders[i]);
-            token = req.rawHeaders[i].slice(6)
+            if (req.rawHeaders[i].search(/\btoken=\b/) >=0 ) {
+                let pos = req.rawHeaders[i].search(/\btoken=\b/)
+                //console.log(req.rawHeaders[i].slice(pos + 6));
+                token = req.rawHeaders[i].slice(pos + 6)
+            }
+
         }
     }
     if (!token){

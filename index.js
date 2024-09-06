@@ -26,10 +26,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //establish database 'connection' and load the users
 if (openDatabase()){
-    console.log("yupieeeeeeeeeeee")
+    console.log("Database opened successfully")
     loadUsers()
 }else{
-    console.log(":(")
+    console.log("Database problem :(")
 }
 let user;
 
