@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
-const {openDatabase,closeDatabase,writeUsers, readUsers} = require('./database');
+const {openDatabase,closeDatabase,writeUsers, readUsers, updateUserColor} = require('./database');
 
 const usersFilePath = path.join(__dirname, 'users.json');
 
@@ -11,7 +11,7 @@ in every function before implementing the database*/
 let users = []
 
 //Constructor for user
-function User(username, password, color) {
+function User(username, password, color, dbID) {
     this.username = username;
     this.password = password;
     this.color = color;
@@ -77,12 +77,14 @@ function updateColor(user,color){
     let userIndex = findUser(user.username , users)
     if (userIndex != null){
         users[userIndex].color = color;
-        saveUsers(users);
+        updateUserColor(users[userIndex]);
         return true;
     }
     return false;
 }
 
+
+//TODO we dont really need to load all the users need to just look into the DB to authenticate the user
 function authenticateUser(username, password) {
     //const users = loadUsers();
     if (findUser(username, users)  != null) {

@@ -5,7 +5,7 @@ const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
 const { registerUser, authenticateUser, verifyToken, updateColor, loadUsers} = require('./auth');
 const jwt = require("jsonwebtoken");
-const {openDatabase,closeDatabase} = require('./database');
+const {openDatabase,closeDatabase, writeChat} = require('./database');
 
 
 //TODO: Clean up old functions
@@ -22,6 +22,9 @@ let chatHistory = [];
 // Serve static files from the "public" directory
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+
+//establish database 'connection' and load the users
 if (openDatabase()){
     console.log("yupieeeeeeeeeeee")
     loadUsers()
@@ -119,7 +122,28 @@ io.on('connection', (socket) => {
     });
 });
 
+setInterval(function(){
+    console.log("saving chat")
+    writeChat(chatHistory);
+},1000) //logs hi every second
+
 // Start the server
 http.listen(3000, () => {
     console.log('Server is running on port 3000');
+});
+
+
+
+
+
+
+http.on('close', () => {
+    writeChat(chatHistory);
+});
+
+process.on('SIGINT', () => {
+    writeChat(chatHistory).then(r => console.log("HI"));
+    closeDatabase()
+    http.close();
+    process.exit();
 });

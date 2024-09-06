@@ -3,10 +3,11 @@ const sqlite3 = require('sqlite3').verbose();
 // open database
 let db;
 //couldn't not import from auth due  to some bug i could not figure out
-function User(username, password, color) {
+function User(username, password, color, id) {
     this.username = username;
     this.password = password;
     this.color = color;
+    this.id = id
 }
 
 
@@ -43,13 +44,13 @@ function closeDatabase(){
 function createTables() {
     db.exec(`
     create table users (
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         username text not null,
         password text not null,
         color text not null
     );
      create table chat_log (
-        message_id int primary key not null,
+        message_id INTEGER PRIMARY KEY AUTOINCREMENT,
         message_text text not null,
         message_user text not null,
         message_color text not null
@@ -72,20 +73,30 @@ function writeUsers(users){
     }
 
 }
-//TODO fix problem with async calls all over the auth
+
+function updateUserColor(user){
+    db.run(`UPDATE users SET color = ? WHERE id = ?`,[user.color,user.id] ,function (err){
+        if (err) {
+            return console.error(err.message);
+        }
+    });
+    console.log(`User ${user.id}  ${user.username}  has update his color to ${user.color}`);
+}
+
+//Read users from Database
 function readUsers() {
 
 
     return new Promise((resolve, reject) => {
         let users = []
-        db.all(`SELECT user_id, username, password, color FROM users`, [], (err, rows) => {
+        db.all(`SELECT id, username, password, color FROM users`, [], (err, rows) => {
             if (err) {
                 return reject(err);
             }
 
             rows.forEach((row) => {
-                console.log(`ID: ${row.user_id}, Username: ${row.username},Color: ${row.color} ,Password: ${row.password}`);
-                users.push(new User(row.username, row.password, row.color))
+                console.log(`ID: ${row.id}, Username: ${row.username},Color: ${row.color} ,Password: ${row.password}`);
+                users.push(new User(row.username, row.password, row.color ,row.id))
             });
             resolve(users)
         });
@@ -95,9 +106,24 @@ function readUsers() {
 
 }
 
+async function writeChat(chatHistory) {
+    for (let i = 0; i < chatHistory.length; i++) {
+        await db.run(`INSERT INTO chat_log(message_text, message_user, message_color) VALUES(?, ?, ?)`, [chatHistory[i].message, chatHistory[i].sender, chatHistory[i].color], function (err) {
+            if (err) {
+                return console.error(err.message);
+            } else {
+                console.log("Chat message", chatHistory[i].message, chatHistory[i].sender, chatHistory[i].color);
+            }
+        })
+    }
+
+}
+
 module.exports = {
     openDatabase,
     closeDatabase,
     writeUsers,
-    readUsers
+    readUsers,
+    writeChat,
+    updateUserColor
 }
