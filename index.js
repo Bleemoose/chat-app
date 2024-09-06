@@ -5,7 +5,7 @@ const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
 const { registerUser, authenticateUser, verifyToken, updateColor, loadUsers} = require('./auth');
 const jwt = require("jsonwebtoken");
-const {openDatabase,closeDatabase, writeChat} = require('./database');
+const {openDatabase,closeDatabase, writeChat, readChatHistory} = require('./database');
 
 
 //TODO: Clean up old functions
@@ -16,8 +16,7 @@ function getRandomColor() {
 
 
 
-// Variable to store chat messages
-let chatHistory = [];
+
 
 // Serve static files from the "public" directory
 app.use(express.static(__dirname + '/public'));
@@ -25,12 +24,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 //establish database 'connection' and load the users
+let chatHistory = [];
 if (openDatabase()){
     console.log("Database opened successfully")
     loadUsers()
+    readChatHistory().then(result => {
+       chatHistory = result;
+       lastSavedChatIndex = result.length;
+    })
 }else{
     console.log("Database problem :(")
 }
+
+// Variable to store chat messages
+
+let lastSavedChatIndex = chatHistory.length;
 let user;
 
 //Main page
@@ -124,8 +132,19 @@ io.on('connection', (socket) => {
 
 setInterval(function(){
     console.log("saving chat")
-    writeChat(chatHistory);
-},1000) //logs hi every second
+
+    if (chatHistory.length == 0){
+        return
+    }
+    let chatToBeSaved = chatHistory
+    for (let i = 0; i < lastSavedChatIndex; i++){
+        chatToBeSaved.shift()
+    }
+    lastSavedChatIndex = chatHistory.length;
+
+    //console.log(chatToBeSaved)
+    writeChat(chatToBeSaved);
+},16000 ) //logs hi every second
 
 // Start the server
 http.listen(3000, () => {
@@ -136,7 +155,9 @@ http.listen(3000, () => {
 
 
 
+//These dont work for some reason
 
+/*
 http.on('close', () => {
     writeChat(chatHistory);
 });
@@ -147,3 +168,4 @@ process.on('SIGINT', () => {
     http.close();
     process.exit();
 });
+ */

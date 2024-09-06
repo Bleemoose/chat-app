@@ -96,7 +96,6 @@ function sendMessage() {
 
 function displayMessage(message, sender, color) {
     let li = document.createElement('li');
-    console.log(color)
     li.style.color = `${color}`
     li.textContent = `${sender}: ${message}`;
     messagesList.appendChild(li);

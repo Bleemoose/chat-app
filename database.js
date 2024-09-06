@@ -10,6 +10,13 @@ function User(username, password, color, id) {
     this.id = id
 }
 
+function Message(msg, sender , color ) {
+    this.message = msg;
+    this.sender = sender;
+    this.color = color;
+
+}
+
 
 
 //TODO: check if the tables exist in the database then create them if not
@@ -106,9 +113,9 @@ function readUsers() {
 
 }
 
-async function writeChat(chatHistory) {
+function writeChat(chatHistory) {
     for (let i = 0; i < chatHistory.length; i++) {
-        await db.run(`INSERT INTO chat_log(message_text, message_user, message_color) VALUES(?, ?, ?)`, [chatHistory[i].message, chatHistory[i].sender, chatHistory[i].color], function (err) {
+         db.run(`INSERT INTO chat_log(message_text, message_user, message_color) VALUES(?, ?, ?)`, [chatHistory[i].message, chatHistory[i].sender, chatHistory[i].color], function (err) {
             if (err) {
                 return console.error(err.message);
             } else {
@@ -119,11 +126,34 @@ async function writeChat(chatHistory) {
 
 }
 
+function readChatHistory() {
+
+
+    return new Promise(async (resolve, reject) => {
+        let chat = []
+        await db.all(`SELECT message_id, message_text, message_user, message_color FROM chat_log`, [], (err, rows) => {
+            if (err) {
+                return reject(err);
+            }
+
+            rows.forEach((row) => {
+                console.log(`Message: ${row.message_text},User: ${row.message_user} Color: ${row.message_color},`);
+                chat.push(new Message(row.message_text, row.message_user, row.message_color))
+            });
+            resolve(chat)
+        });
+
+
+    });
+
+}
+
 module.exports = {
     openDatabase,
     closeDatabase,
     writeUsers,
     readUsers,
     writeChat,
-    updateUserColor
+    updateUserColor,
+    readChatHistory
 }
